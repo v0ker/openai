@@ -128,6 +128,7 @@ interface class OpenAIAudio implements OpenAIAudioBase {
     double? speed,
     String outputFileName = "output",
     Directory? outputDirectory,
+    Map<String, String> headers = const {},
   }) async {
     return await OpenAINetworkingClient.postAndExpectFileResponse(
       to: BaseApiUrlBuilder.build(endpoint + "/speech"),
@@ -143,6 +144,7 @@ interface class OpenAIAudio implements OpenAIAudioBase {
       },
       outputFileName: outputFileName,
       outputDirectory: outputDirectory,
+      headers: headers,
     );
   }
 }

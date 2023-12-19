@@ -205,12 +205,14 @@ abstract class OpenAINetworkingClient {
     required Directory? outputDirectory,
     Map<String, dynamic>? body,
     http.Client? client,
+    Map<String, String> customHeaders = const {},
   }) async {
     OpenAILogger.logStartRequest(to);
 
     final uri = Uri.parse(to);
 
     final headers = HeadersBuilder.build();
+    headers.addAll(customHeaders);
 
     final handledBody = body != null ? jsonEncode(body) : null;
 
@@ -225,6 +227,21 @@ abstract class OpenAINetworkingClient {
     OpenAILogger.startingTryCheckingForError();
 
     final isJsonDecodedMap = tryDecodedToMap(response.body);
+
+    if(isFailureStatusCode(response.statusCode)) {
+      OpenAILogger.errorFoundInRequest();
+
+      final error = decodeToMap(response.body);
+
+      final message = error[OpenAIStrings.errorFieldKey];
+
+      final statusCode = response.statusCode;
+
+      final exception = RequestFailedException(message, statusCode);
+      OpenAILogger.errorOcurred(exception);
+
+      throw exception;
+    }
 
     if (isJsonDecodedMap) {
       final decodedBody = decodeToMap(response.body);
@@ -662,6 +679,11 @@ abstract class OpenAINetworkingClient {
 
       return onSuccess(decodedBody);
     }
+  }
+
+  static bool isFailureStatusCode(int statusCode) {
+    return statusCode >= HttpStatus.badRequest ||
+        statusCode < HttpStatus.ok;
   }
 
   static Map<String, dynamic> decodeToMap(String responseBody) {
