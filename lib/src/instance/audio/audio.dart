@@ -144,7 +144,7 @@ interface class OpenAIAudio implements OpenAIAudioBase {
       },
       outputFileName: outputFileName,
       outputDirectory: outputDirectory,
-      headers: headers,
+      customHeaders: headers,
     );
   }
 }
